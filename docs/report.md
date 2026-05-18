@@ -103,6 +103,7 @@ sudo chmod 770 /var/log/agent-app
 ```
 // 계정 변경
 sudo su - agent-admin
+sudo -E su agent-admin(환경 변수를 유지하고 싶은 경우)
 
 // 환경 변수 설정
 export AGENT_HOME=/opt/agent
@@ -161,7 +162,7 @@ sudo nano /etc/logrotate.d/agent-app
     missingok
     notifempty
     compress
-    create 0640 agent-admin agent-core
+    create 640 agent-admin agent-core
 }
 
 
