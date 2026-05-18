@@ -125,3 +125,66 @@ orb create ubuntu:24.04 codyssey-v2
 ```
 ![5.run](screenshots/5.run.png)
 ![6.listen](screenshots/6.listen.png)
+
+<br>
+<br>
+
+### [4] 시스템 관제 자동화 스크립트 구현
+[4-1] monitor.sh 구현
+```
+// 앱 백그라운드 실행
+nohup ./agent-app > /dev/null 2>&1 &
+
+// 스크립트 파일 생성 및 편집
+sudo mkdir -p $AGENT_HOME/bin
+sudo nano $AGENT_HOME/bin/monitor.sh
+
+// 파일 위치/권한 정책
+sudo chown agent-dev:agent-core $AGENT_HOME/bin/monitor.sh
+sudo chmod 750 $AGENT_HOME/bin/monitor.sh
+
+// 방화벽 상태 조회의 경우만 NOPASSWD 부여
+echo "agent-admin ALL=(ALL) NOPASSWD: /usr/sbin/ufw status" | sudo tee /etc/sudoers.d/agent-admin-ufw
+```
+![7.monitor](screenshots/7.monitor.png)
+
+<br>
+
+[4-2] 로그 파일 용량 관리
+```
+// 설정 파일 열기
+sudo nano /etc/logrotate.d/agent-app
+
+/var/log/agent-app/monitor.log {
+    size 10M
+    rotate 10
+    missingok
+    notifempty
+    compress
+    create 0640 agent-admin agent-core
+}
+
+
+// 로그 확인
+cat /var/log/agent-app/monitor.log
+```
+![8.result](screenshots/8.result.png)
+![8.result](screenshots/8-1.result_fail.png)
+![8.result](screenshots/8-2.result_success.png)
+
+<br>
+<br>
+
+### [5] 자동 실행(cron) 설정
+
+```
+// 편집기 열기
+crontab -e
+
+* * * * * /opt/agent/bin/monitor.sh >> /var/log/agent-app/cron_output.log 2>&1
+
+
+// 로그 확인
+cat /var/log/agent-app/cron_output.log
+```
+![9.cron](screenshots/9.cron.png)
